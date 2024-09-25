@@ -70,13 +70,13 @@ dependencies = [
     "loguru"
 ]
 
-#[tool.hatch.envs.test.env-vars]
-#RETRY_ATTEMPTS="0"
+[tool.hatch.envs.test.env-vars]
+RETRY_ATTEMPTS="0"
 
 [tool.hatch.envs.test.scripts]
 test = "hatch run nose2"
 testv = "hatch run nose2 --verbose"
-#cov = ["coverage run --source=src -m nose2", "coverage report"]
+cov = ["coverage run --source=src -m nose2", "coverage report"]
 
 [[tool.hatch.envs.test.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
