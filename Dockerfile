@@ -1,14 +1,10 @@
 # Stage 1: Build stage
 FROM rockylinux:9.3-minimal AS build
 
-# Install necessary build tools
-RUN microdnf install -y curl tar
-
-# Download the hatch tar.gz file from GitHub
-RUN curl -L https://github.com/pypa/hatch/releases/latest/download/hatch-x86_64-unknown-linux-gnu.tar.gz -o /tmp/hatch-x86_64-unknown-linux-gnu.tar.gz
-
-# Extract the hatch binary
-RUN tar -xzf /tmp/hatch-x86_64-unknown-linux-gnu.tar.gz -C /tmp/
+# Install necessary build tools & hatch 
+RUN microdnf install -y curl tar && \
+ curl -L https://github.com/pypa/hatch/releases/latest/download/hatch-x86_64-unknown-linux-gnu.tar.gz -o /tmp/hatch-x86_64-unknown-linux-gnu.tar.gz && \
+ tar -xzf /tmp/hatch-x86_64-unknown-linux-gnu.tar.gz -C /tmp/ && chmod +x /tmp/hatch
 
 # Stage 2: Final stage
 FROM rockylinux:9.3-minimal
@@ -31,26 +27,21 @@ RUN useradd -u 1001 -r -g 0 -m -d ${HOME} -s /sbin/nologin \
 # Copy the hatch binary from the build stage
 COPY --from=build /tmp/hatch /usr/bin/hatch
 
-# Ensure the hatch binary is executable
-RUN chmod +x /usr/bin/hatch
-
 # Switch to the non-root user
 USER wrapper
 
 # Copy the application files into the /app directory
-COPY --chown=1001:0 . /tmp
-WORKDIR /tmp
+COPY --chown=1001:0 . /app
+WORKDIR /app
 
 # Set up virtual environment paths
 ENV VIRTUAL_ENV=/app/envs/wrapper
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Prune any existing environments and create a new production environment
-RUN cd /tmp && hatch env prune && \
+RUN hatch env prune && \
     hatch env create prod && \
-    rm -fr /tmp/* /tmp/.git /tmp/.pytest_cache
-
-WORKDIR /app
+    rm -fr /tmp/* /app/.git /app/.pytest_cache
 
 # Set the default command to run when the container starts
-CMD ["cwl-wrapper"]
+CMD ["bash", "-c", "source /app/envs/wrapper/bin/activate && cwl-wrapper"]
