@@ -31,11 +31,11 @@ jobs:
         if: github.ref != 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip_existing: true
+          skip-existing: true
           repository-url: https://test.pypi.org/legacy/
       - name: Publish package distributions to PyPI
         if: github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip_existing: true
+          skip-existing: true
           repository-url: https://upload.pypi.org/legacy/
