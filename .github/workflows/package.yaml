@@ -30,6 +30,4 @@ jobs:
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          skip_existing: true
-          password: ${{ secrets.MY_PYPI_API_TOKEN }}  # Ensure your PyPI API token is set in secrets otherwise use trusted publishers mode 
-          repository-url: https://upload.pypi.org/legacy/  # Use Test PyPI or main PyPI https://upload.pypi.org/legacy/ 
+          repository-url: https://test.pypi.org/legacy/
