@@ -5,14 +5,17 @@ build-backend = "hatchling.build"
 [project]
 name = "cwl-wrapper"
 dynamic = ["version"]
-description = "CWL wrapper to add stage-in and stage-out to a base app package"
+description = "CWL wrapper to add stage-in and stage-out to a base application packages encoded in CWL"
 readme = "README.md"
 license = "Apache-2.0"
 keywords = []
 
-#To add other authors 
 authors = [
-  { name = "Fabrice Brito", email = "fabrice.brito@terradue.com" }
+    { name = "Fabrice Brito", email = "fabrice.brito@terradue.com" },
+    { name = "Roberto di Rienzo"},
+    { name = "Blasco Brauzzi"}, 
+    { name = "Emmanuel Mathot"},
+    { name = "Michele Longobardo"}
 ]
 
 classifiers = [
@@ -70,8 +73,6 @@ dependencies = [
     "loguru"
 ]
 
-[tool.hatch.envs.test.env-vars]
-RETRY_ATTEMPTS="0"
 
 [tool.hatch.envs.test.scripts]
 test = "hatch run nose2"
