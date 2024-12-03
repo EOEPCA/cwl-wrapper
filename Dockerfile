@@ -10,8 +10,13 @@ RUN microdnf install -y curl tar && \
 FROM rockylinux:9.3-minimal
 
 # Install runtime dependencies
-RUN microdnf install -y --nodocs nodejs && \
+RUN microdnf install -y --nodocs nodejs wget && \
     microdnf clean all
+
+# install yq
+RUN wget https://github.com/mikefarah/yq/releases/download/v4.44.5/yq_linux_amd64 -O /usr/bin/yq && \
+    chmod +x /usr/bin/yq 
+
 
 # Set up a default user and home directory
 ENV HOME=/home/wrapper
