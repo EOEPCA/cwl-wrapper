@@ -1,4 +1,0 @@
-click
-click-config-file
-jinja2
-pyyaml

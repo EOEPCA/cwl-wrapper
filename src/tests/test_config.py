@@ -30,13 +30,6 @@ class TestConfig(unittest.TestCase):
             print('stagein="{0}/data/stagein.cwl"'.format(testdir), file=f)
             print('stageout="{0}/data/stageout_alt.cwl"'.format(testdir), file=f)
 
-        if not os.path.exists("/home/jovyan/.cwlwrapper"):
-            os.makedirs("/home/jovyan/.cwlwrapper")
-
-        shutil.copy(
-            os.path.join(testdir, "data/default_config.conf"), "/home/jovyan/.cwlwrapper/default.conf"
-        )
-
     def test_default_config(self):
         runner = CliRunner()
         result = runner.invoke(

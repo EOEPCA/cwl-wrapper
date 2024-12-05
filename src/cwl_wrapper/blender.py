@@ -109,8 +109,6 @@ class Blender:
         return None
 
     def __create_on_stage_inputs(self, where, directories_out: dict):
-        # # logger.debug(where)
-        # # logger.debug(directories_out.__str__())
 
         inp = copy.deepcopy(self.user_wf.get_raw_all_inputs())
 
@@ -140,26 +138,23 @@ class Blender:
             for d in what:
                 steps[follow_node]["in"][d] = what[d]
 
-    def __create_global_cwl_outputs(self, where, stage_out_dir):
+    def __create_global_cwl_outputs(self, where, stage_out_dir, command_out):
 
-        # # logger.debug(where)
-        # # logger.debug(f"stage_out_dir {stage_out_dir}")
+ 
         inp = copy.deepcopy(self.user_wf.get_raw_all_outputs())
-        # # logger.debug(inp)
         where_is_dict = self.__is_dict_or_list(where)
         if where_is_dict is None:
             raise Exception("__create_global_cwl_outputs where_is_dict is None")
 
         if inp:
             for it in inp:
-                # # logger.debug(it)
                 if type(it) is str:
 
                     if it in stage_out_dir:
                         if "outputSource" in inp[it]:
                             inp[it]["outputSource"] = []
                             inp[it]["outputSource"].append(stage_out_dir[it])
-
+                            inp[it]["type"] = command_out["type"]
                     if where_is_dict:
                         where[it] = inp[it]
                     else:
@@ -171,7 +166,7 @@ class Blender:
                             if "outputSource" in it:
                                 it["outputSource"] = []
                                 it["outputSource"].append(stage_out_dir[it["id"]])
-
+                                it["type"] = command_out["type"]
                         if where_is_dict:
                             pid, psa = self.__to_cwl_dict(it)
                             where[pid] = psa
@@ -433,10 +428,10 @@ class Blender:
 
             if it.is_optional:
                 command_out = copy.deepcopy(
-                    self.rulez.get("/cwl/outputBindingResult/command/Directory?")
+                    self.rulez.get("/cwl/outputBindingResultStageIn/command/Directory?")
                 )
             else:
-                command_out = copy.deepcopy(self.rulez.get("/cwl/outputBindingResult/command/Directory"))
+                command_out = copy.deepcopy(self.rulez.get("/cwl/outputBindingResultStageIn/command/Directory"))
 
             command_id = "%s_out" % it.id
             nodes_out[it.id] = "%s/%s_out" % (start_node_name, it.id)
@@ -487,7 +482,7 @@ class Blender:
         if len(self.outputs) == 0:
             # no stage-out node(s) so the on_stage step lists the user workflow outputs
             outputs = self.user_wf.get_raw_all_outputs()
-            # logger.debug(outputs)
+            # logger.debug(f"outputs: {outputs}")
             for it in outputs:
                 steps[on_stage_node]["out"].append(it["id"])
 
@@ -505,13 +500,14 @@ class Blender:
                 )
 
             # self.__add_inputs_store_to_stage_out(steps[start_node_name]['in'])
-
+            
             the_command = copy.deepcopy(self.main_stage_out)  # self.main_stage_in.copy()
             the_command_inputs = the_command["inputs"]
             the_command_outputs = the_command["outputs"]
-
+    
             # appending the stageout template outputs to the macro cwl outputs
             for stage_out_output_id in the_command_outputs:
+
                 nodes_out[stage_out_output_id] = "%s/%s" % (
                     start_node_name,
                     stage_out_output_id,
@@ -552,12 +548,12 @@ class Blender:
             steps[start_node_name]["run"] = the_command
 
             command_out = (
-                copy.deepcopy(self.rulez.get("/cwl/outputBindingResult/command/Directory[]"))
+                copy.deepcopy(self.rulez.get("/cwl/outputBindingResultStageOut/command/Directory[]"))
                 if it.is_array
-                else copy.deepcopy(self.rulez.get("/cwl/outputBindingResult/command/Directory"))
+                else copy.deepcopy(self.rulez.get("/cwl/outputBindingResultStageOut/command/Directory"))
             )
-
             command_id = "%s_out" % it.id
+            
             nodes_out[it.id] = "%s/%s_out" % (start_node_name, it.id)
             if type(the_command_outputs) is list:
                 command_out["id"] = command_id
@@ -578,8 +574,7 @@ class Blender:
 
             cursor = cursor + 1
             start_node_name = "%s_%d" % (start_node_name, cursor)
-
-        self.__create_global_cwl_outputs(self.start["outputs"], nodes_out)
+        self.__create_global_cwl_outputs(self.start["outputs"], nodes_out, command_out)
         self.__connect_to_stage_out(nodes_out, steps)
 
         return self.start
