@@ -109,8 +109,6 @@ class Blender:
         return None
 
     def __create_on_stage_inputs(self, where, directories_out: dict):
-        # logger.debug(where)
-        # # logger.debug(directories_out.__str__())
 
         inp = copy.deepcopy(self.user_wf.get_raw_all_inputs())
 
@@ -430,10 +428,10 @@ class Blender:
 
             if it.is_optional:
                 command_out = copy.deepcopy(
-                    self.rulez.get("/cwl/outputBindingResult/command/Directory?")
+                    self.rulez.get("/cwl/outputBindingResultStageIn/command/Directory?")
                 )
             else:
-                command_out = copy.deepcopy(self.rulez.get("/cwl/outputBindingResult/command/Directory"))
+                command_out = copy.deepcopy(self.rulez.get("/cwl/outputBindingResultStageIn/command/Directory"))
 
             command_id = "%s_out" % it.id
             nodes_out[it.id] = "%s/%s_out" % (start_node_name, it.id)
@@ -484,7 +482,7 @@ class Blender:
         if len(self.outputs) == 0:
             # no stage-out node(s) so the on_stage step lists the user workflow outputs
             outputs = self.user_wf.get_raw_all_outputs()
-            logger.debug(f"outputs: {outputs}")
+            # logger.debug(f"outputs: {outputs}")
             for it in outputs:
                 steps[on_stage_node]["out"].append(it["id"])
 
@@ -550,11 +548,12 @@ class Blender:
             steps[start_node_name]["run"] = the_command
 
             command_out = (
-                copy.deepcopy(self.rulez.get("/cwl/outputBindingResult/command/Directory[]"))
+                copy.deepcopy(self.rulez.get("/cwl/outputBindingResultStageOut/command/Directory[]"))
                 if it.is_array
-                else copy.deepcopy(self.rulez.get("/cwl/outputBindingResult/command/Directory"))
+                else copy.deepcopy(self.rulez.get("/cwl/outputBindingResultStageOut/command/Directory"))
             )
             command_id = "%s_out" % it.id
+            
             nodes_out[it.id] = "%s/%s_out" % (start_node_name, it.id)
             if type(the_command_outputs) is list:
                 command_out["id"] = command_id
